@@ -13,18 +13,22 @@ mysql = MySQL(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == "GET":
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM contacts")
+        contacts= cur.fetchall()
+        return render_template('index.html',contacts=contacts)
+
+@app.route('/add',methods=['POST'])
+def add():
     if request.method == "POST":
         name=request.form['name']
         mob=request.form['mob']
         cur = mysql.connection.cursor()
         cur.execute("INSERT INTO contacts(name, mob) VALUES (%s, %s)", (name, mob))
         mysql.connection.commit()
-        return render_template('index.html')
-    elif request.method == "GET":
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM contacts")
-        contacts= cur.fetchall()
-        return render_template('index.html',contacts=contacts)
+        return redirect('/')
+
 
 @app.route('/update', methods=['POST'])
 def update():
@@ -46,7 +50,7 @@ def delete():
         return redirect('/')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')
 
 
 
